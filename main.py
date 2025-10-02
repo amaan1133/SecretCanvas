@@ -258,10 +258,15 @@ def reveal():
             if not private_key_pem:
                 return jsonify({'error': 'No RSA private key provided'}), 400
 
-            private_key = serialization.load_pem_private_key(
-                private_key_pem.encode(),
-                password=None
-            )
+            try:
+                # Clean up the PEM key - ensure proper formatting
+                private_key_pem = private_key_pem.strip()
+                private_key = serialization.load_pem_private_key(
+                    private_key_pem.encode(),
+                    password=None
+                )
+            except Exception as pem_error:
+                return jsonify({'error': f'Invalid RSA private key format: {str(pem_error)}. Make sure to copy the entire key including -----BEGIN PRIVATE KEY----- and -----END PRIVATE KEY----- lines.'}), 400
 
             encrypted_aes_key = base64.b64decode(aes_key_input)
             aes_key = private_key.decrypt(
