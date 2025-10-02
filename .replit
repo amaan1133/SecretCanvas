@@ -12,7 +12,7 @@ runButton = "Start Flask App"
 [[workflows.workflow]]
 name = "Project"
 mode = "parallel"
-author = "agent"
+author = "amaan"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
@@ -20,7 +20,7 @@ args = "CipherCanvas"
 
 [[workflows.workflow]]
 name = "CipherCanvas"
-author = "agent"
+author = "amaan"
 
 [workflows.workflow.metadata]
 outputType = "webview"
@@ -32,7 +32,7 @@ waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Start Flask App"
-author = 48226928
+author = amaan
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
