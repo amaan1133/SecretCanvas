@@ -23,8 +23,17 @@ name = "CipherCanvas"
 author = "agent"
 
 [workflows.workflow.metadata]
-outputType = "vnc"
+outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python main.py"
+waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 5000
+
+[[ports]]
+localPort = 34195
+externalPort = 80

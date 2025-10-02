@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherCanvas - Cryptography + Steganography</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        textarea, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus, input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button.primary:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .key-display {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #218838;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨🔐 CipherCanvas</h1>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('hide')">Hide Secret Message</button>
+            <button class="tab-button" onclick="switchTab('reveal')">Reveal Secret Message</button>
+        </div>
+
+        <div id="hide-tab" class="tab-content active">
+            <h2>Hide Secret Message</h2>
+            <form id="hide-form" onsubmit="hideMessage(event)">
+                <div class="form-group">
+                    <label for="hide-message">Secret Message:</label>
+                    <textarea id="hide-message" name="message" required placeholder="Enter your secret message here..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="hide-image">Select Input Image (PNG only):</label>
+                    <input type="file" id="hide-image" name="image" accept=".png" required>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="use-rsa-hide" checked>
+                    <label for="use-rsa-hide" style="margin-bottom: 0;">Use RSA encryption for AES key (recommended)</label>
+                </div>
+
+                <button type="submit" class="primary">🔒 Hide Message in Image</button>
+            </form>
+
+            <div class="loading" id="hide-loading">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+
+            <div class="error" id="hide-error"></div>
+
+            <div class="result-box" id="hide-result">
+                <h3>✅ Success! Encryption Keys:</h3>
+                <div class="note" id="hide-note"></div>
+                <div id="hide-keys"></div>
+                <a href="#" id="download-link" class="download-btn" download>📥 Download Image with Hidden Message</a>
+            </div>
+        </div>
+
+        <div id="reveal-tab" class="tab-content">
+            <h2>Reveal Secret Message</h2>
+            <form id="reveal-form" onsubmit="revealMessage(event)">
+                <div class="form-group">
+                    <label for="reveal-image">Select Image with Hidden Message (PNG only):</label>
+                    <input type="file" id="reveal-image" name="image" accept=".png" required>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="use-rsa-reveal" checked>
+                    <label for="use-rsa-reveal" style="margin-bottom: 0;">Use RSA decryption</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="reveal-aes-key">Encrypted AES Key (if RSA) or plaintext AES Key (base64):</label>
+                    <input type="text" id="reveal-aes-key" name="aes_key" required placeholder="Paste the AES key here...">
+                </div>
+
+                <div class="form-group" id="private-key-group">
+                    <label for="reveal-private-key">RSA Private Key:</label>
+                    <textarea id="reveal-private-key" name="private_key" placeholder="Paste the RSA private key here (only if using RSA)..."></textarea>
+                </div>
+
+                <button type="submit" class="primary">🔓 Reveal Secret Message</button>
+            </form>
+
+            <div class="loading" id="reveal-loading">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+
+            <div class="error" id="reveal-error"></div>
+
+            <div class="result-box" id="reveal-result">
+                <h3>✅ Decrypted Message:</h3>
+                <div class="key-display" id="revealed-message" style="font-family: inherit; font-size: 1em;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'hide') {
+                document.querySelector('.tab-button:first-child').classList.add('active');
+                document.getElementById('hide-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab-button:last-child').classList.add('active');
+                document.getElementById('reveal-tab').classList.add('active');
+            }
+        }
+
+        document.getElementById('use-rsa-reveal').addEventListener('change', function() {
+            const privateKeyGroup = document.getElementById('private-key-group');
+            if (this.checked) {
+                privateKeyGroup.style.display = 'block';
+            } else {
+                privateKeyGroup.style.display = 'none';
+            }
+        });
+
+        async function hideMessage(event) {
+            event.preventDefault();
+            
+            const loading = document.getElementById('hide-loading');
+            const error = document.getElementById('hide-error');
+            const result = document.getElementById('hide-result');
+            
+            loading.classList.add('show');
+            error.classList.remove('show');
+            result.classList.remove('show');
+            
+            const formData = new FormData();
+            formData.append('message', document.getElementById('hide-message').value);
+            formData.append('image', document.getElementById('hide-image').files[0]);
+            formData.append('use_rsa', document.getElementById('use-rsa-hide').checked);
+            
+            try {
+                const response = await fetch('/hide', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    error.textContent = data.error;
+                    error.classList.add('show');
+                } else {
+                    const keysDiv = document.getElementById('hide-keys');
+                    const noteDiv = document.getElementById('hide-note');
+                    keysDiv.innerHTML = '';
+                    
+                    if (data.use_rsa) {
+                        noteDiv.innerHTML = '<strong>⚠️ Security Note:</strong> The plaintext AES key is NOT displayed for security. Use the RSA private key to decrypt the encrypted AES key.';
+                        
+                        keysDiv.innerHTML += `
+                            <p><strong>RSA Private Key:</strong></p>
+                            <div class="key-display">${data.private_key}</div>
+                            
+                            <p><strong>RSA Public Key:</strong></p>
+                            <div class="key-display">${data.public_key}</div>
+                            
+                            <p><strong>Encrypted AES Key (use this for decryption):</strong></p>
+                            <div class="key-display">${data.encrypted_aes_key}</div>
+                        `;
+                    } else {
+                        noteDiv.innerHTML = '<strong>⚠️ Note:</strong> RSA encryption is disabled. The AES key below is in plaintext.';
+                        
+                        keysDiv.innerHTML += `
+                            <p><strong>AES Key (use this for decryption):</strong></p>
+                            <div class="key-display">${data.aes_key}</div>
+                        `;
+                    }
+                    
+                    document.getElementById('download-link').href = data.output_image;
+                    result.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error: ' + err.message;
+                error.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        async function revealMessage(event) {
+            event.preventDefault();
+            
+            const loading = document.getElementById('reveal-loading');
+            const error = document.getElementById('reveal-error');
+            const result = document.getElementById('reveal-result');
+            
+            loading.classList.add('show');
+            error.classList.remove('show');
+            result.classList.remove('show');
+            
+            const formData = new FormData();
+            formData.append('image', document.getElementById('reveal-image').files[0]);
+            formData.append('aes_key', document.getElementById('reveal-aes-key').value);
+            formData.append('use_rsa', document.getElementById('use-rsa-reveal').checked);
+            
+            if (document.getElementById('use-rsa-reveal').checked) {
+                formData.append('private_key', document.getElementById('reveal-private-key').value);
+            }
+            
+            try {
+                const response = await fetch('/reveal', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    error.textContent = data.error;
+                    error.classList.add('show');
+                } else {
+                    document.getElementById('revealed-message').textContent = data.message;
+                    result.classList.add('show');
+                }
+            } catch (err) {
+                error.textContent = 'Error: ' + err.message;
+                error.classList.add('show');
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>
