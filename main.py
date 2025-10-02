@@ -83,7 +83,7 @@ class CipherCanvas:
         
         ttk.Button(input_frame, text="Browse Image", command=self.browse_reveal_image).pack(side='left', padx=5)
         
-        ttk.Label(self.reveal_frame, text="AES Key (base64):", font=('Arial', 10)).pack(pady=5)
+        ttk.Label(self.reveal_frame, text="Encrypted AES Key (if RSA) or plaintext AES Key (base64):", font=('Arial', 10)).pack(pady=5)
         
         self.aes_key_entry = ttk.Entry(self.reveal_frame, width=80)
         self.aes_key_entry.pack(padx=10, pady=5)
@@ -329,7 +329,6 @@ class CipherCanvas:
             self.hide_in_image(self.input_image_path, encrypted_message)
             
             self.keys_text.insert(tk.END, "=== ENCRYPTION KEYS ===\n\n")
-            self.keys_text.insert(tk.END, f"AES Key (base64):\n{base64.b64encode(self.aes_key).decode()}\n\n")
             
             if self.use_rsa_var.get():
                 private_pem = self.rsa_private_key.private_bytes(
@@ -345,7 +344,12 @@ class CipherCanvas:
                 
                 self.keys_text.insert(tk.END, f"RSA Private Key:\n{private_pem.decode()}\n")
                 self.keys_text.insert(tk.END, f"RSA Public Key:\n{public_pem.decode()}\n")
-                self.keys_text.insert(tk.END, f"Encrypted AES Key (base64):\n{base64.b64encode(self.encrypted_aes_key).decode()}\n")
+                self.keys_text.insert(tk.END, f"Encrypted AES Key (base64 - use this for decryption):\n{base64.b64encode(self.encrypted_aes_key).decode()}\n")
+                self.keys_text.insert(tk.END, "\nNOTE: The plaintext AES key is NOT displayed for security. ")
+                self.keys_text.insert(tk.END, "Use the RSA private key to decrypt the encrypted AES key above.\n")
+            else:
+                self.keys_text.insert(tk.END, f"AES Key (base64 - use this for decryption):\n{base64.b64encode(self.aes_key).decode()}\n\n")
+                self.keys_text.insert(tk.END, "NOTE: RSA encryption is disabled. The AES key above is in plaintext.\n")
                 
             messagebox.showinfo("Success", "Message hidden successfully!\nOutput saved as 'output.png'")
             
