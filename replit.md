@@ -1,6 +1,6 @@
 # CipherCanvas - Cryptography + Steganography
 
-## Overview
+Overview
 CipherCanvas is a Flask web application that combines cryptography and steganography to enable secret communication. Users can encrypt messages with AES and RSA, hide them in images using LSB steganography, and later extract and decrypt them through an intuitive web interface.
 
 ## How to Use
